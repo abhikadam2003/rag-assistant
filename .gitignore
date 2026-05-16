@@ -1,0 +1,164 @@
+# =========================
+# Python cache / compiled
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Virtual environments
+# =========================
+.env
+.venv
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# =========================
+# Chroma / Vector DB
+# =========================
+chroma_db/
+*/chroma_db/
+
+# =========================
+# Local cache
+# =========================
+local_cache/
+.cache/
+
+# =========================
+# Build / Distribution
+# =========================
+.Python
+build/
+dist/
+downloads/
+develop-eggs/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# =========================
+# Logs
+# =========================
+*.log
+pip-log.txt
+pip-delete-this-directory.txt
+
+# =========================
+# Testing / Coverage
+# =========================
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+.spyderproject
+.spyproject
+.ropeproject
+
+# =========================
+# Type checking
+# =========================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Streamlit
+# =========================
+.streamlit/
+
+# =========================
+# Temporary files
+# =========================
+*.tmp
+*.temp
+
+# =========================
+# Database
+# =========================
+db.sqlite3
+db.sqlite3-journal
+
+# =========================
+# Flask
+# =========================
+instance/
+.webassets-cache
+
+# =========================
+# Scrapy
+# =========================
+.scrapy
+
+# =========================
+# Sphinx docs
+# =========================
+docs/_build/
+
+# =========================
+# PyBuilder
+# =========================
+.pybuilder/
+target/
+
+# =========================
+# PyInstaller
+# =========================
+*.manifest
+*.spec
+
+# =========================
+# C extensions
+# =========================
+*.so
+
+# =========================
+# Misc
+# =========================
+.python-version
+site/
+cython_debug/
+__pypackages__/
+celerybeat-schedule
+celerybeat.pid
+*.sage.py

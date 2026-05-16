@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Build & Tag Docker Image') {
+            steps {
+                script {
+
+                    dir('frontend') {
+
+                        withDockerRegistry(credentialsId: 'docker-cred') {
+
+                            sh 'docker build -t abhishekkadam2003/rag-frontend:latest .'
+
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+
+                    withDockerRegistry(credentialsId: 'docker-cred') {
+
+                        sh 'docker push abhishekkadam2003/rag-frontend:latest'
+
+                    }
+                }
+            }
+        }
+    }
+}
