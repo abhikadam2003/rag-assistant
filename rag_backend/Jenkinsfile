@@ -7,11 +7,11 @@ pipeline {
             steps {
                 script {
 
-                    dir('rag-backend') {
+                    dir('rag_backend') {
 
                         withDockerRegistry(credentialsId: 'docker-cred') {
 
-                            sh 'docker build -t abhishekkadam2003/rag-backend:latest .'
+                            sh 'docker build -t abhishekkadam2003/rag_backend:latest .'
 
                         }
                     }
@@ -25,7 +25,7 @@ pipeline {
 
                     withDockerRegistry(credentialsId: 'docker-cred') {
 
-                        sh 'docker push abhishekkadam2003/rag-backend:latest'
+                        sh 'docker push abhishekkadam2003/rag_backend:latest'
 
                     }
                 }
