@@ -15,21 +15,26 @@ set_verbose(True)
 
 
 class ChatPDF:
+
     vector_store = None
     retriever = None
     chain = None
 
     def __init__(self, llm_model: str = "qwen2.5:1.5b"):
-        # Load Ollama model
-        self.model = ChatOllama(model=llm_model)
 
-        # Split PDF text into chunks
+        # Connect to Ollama running inside Kubernetes
+        self.model = ChatOllama(
+            model=llm_model,
+            base_url="http://ollama-service:11434"
+        )
+
+        # Split PDF into chunks
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1024,
             chunk_overlap=100
         )
 
-        # Prompt template
+        # Prompt Template
         self.prompt = ChatPromptTemplate.from_messages(
             [
                 (
@@ -48,10 +53,13 @@ class ChatPDF:
         self.chain = None
 
     def ingest(self, pdf_file_path: str):
-        # Load PDF
-        docs = PyPDFLoader(file_path=pdf_file_path).load()
 
-        # Split into chunks
+        # Load PDF
+        docs = PyPDFLoader(
+            file_path=pdf_file_path
+        ).load()
+
+        # Split text into chunks
         chunks = self.text_splitter.split_documents(docs)
 
         # Clean metadata
@@ -66,14 +74,15 @@ class ChatPDF:
 
     def ask(self, query: str):
 
-        # Load existing vector DB if not already loaded
+        # Load vector DB if not already loaded
         if not self.vector_store:
+
             self.vector_store = Chroma(
                 persist_directory="chroma_db",
                 embedding_function=FastEmbedEmbeddings(),
             )
 
-        # Create retriever
+        # Retriever
         self.retriever = self.vector_store.as_retriever(
             search_type="similarity_score_threshold",
             search_kwargs={
@@ -96,10 +105,11 @@ class ChatPDF:
         if not self.chain:
             return "Please upload a PDF document first."
 
-        # Get AI response
+        # Generate response
         return self.chain.invoke(query)
 
     def clear(self):
+
         self.vector_store = None
         self.retriever = None
         self.chain = None
