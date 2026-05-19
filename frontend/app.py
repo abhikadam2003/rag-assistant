@@ -1,71 +1,114 @@
-import streamlit as st
+#!/bin/env python3
+
 import requests
+import streamlit as st
 
 # Backend Kubernetes Service URL
 BACKEND_URL = "http://backend-app-backend-chart.rag.svc.cluster.local:8000"
 
 st.set_page_config(
-    page_title="RAG PDF Chat",
-    page_icon="📄",
-    layout="centered"
+    page_title="ChatPDF",
+    layout="wide"
 )
 
-st.title("📄 RAG PDF Chat Application")
 
-st.markdown("Upload a PDF and ask questions from the document.")
+# Store chat messages
+if "messages" not in st.session_state:
+    st.session_state["messages"] = []
 
-# Upload PDF
-uploaded_file = st.file_uploader(
-    "Upload PDF",
-    type=["pdf"]
-)
 
-# Upload Button
-if uploaded_file is not None:
+# Display messages
+def display_messages():
 
-    with st.spinner("Uploading PDF..."):
+    st.subheader("Chat")
 
-        files = {
-            "file": (
-                uploaded_file.name,
-                uploaded_file,
-                "application/pdf"
+    for msg, is_user in st.session_state["messages"]:
+
+        if is_user:
+
+            with st.chat_message("user"):
+                st.write(msg)
+
+        else:
+
+            with st.chat_message("assistant"):
+                st.write(msg)
+
+
+# Upload PDF to backend
+def upload_pdf():
+
+    uploaded_files = st.session_state.get("file_uploader", [])
+
+    for file in uploaded_files:
+
+        with st.spinner(f"Uploading {file.name}..."):
+
+            try:
+
+                files = {
+                    "file": (
+                        file.name,
+                        file,
+                        "application/pdf"
+                    )
+                }
+
+                response = requests.post(
+                    f"{BACKEND_URL}/upload-pdf",
+                    files=files
+                )
+
+                if response.status_code == 200:
+
+                    st.session_state["messages"].append(
+                        (
+                            f"✅ Uploaded {file.name}",
+                            False
+                        )
+                    )
+
+                else:
+
+                    st.session_state["messages"].append(
+                        (
+                            f"❌ Upload Failed: {response.text}",
+                            False
+                        )
+                    )
+
+            except Exception as e:
+
+                st.session_state["messages"].append(
+                    (
+                        f"❌ Error: {e}",
+                        False
+                    )
+                )
+
+
+# Ask question
+def process_input():
+
+    user_input = st.session_state.get("user_input", "").strip()
+
+    if user_input:
+
+        st.session_state["messages"].append(
+            (
+                user_input,
+                True
             )
-        }
+        )
 
-        try:
-            response = requests.post(
-                f"{BACKEND_URL}/upload-pdf",
-                files=files
-            )
-
-            if response.status_code == 200:
-                st.success("PDF uploaded successfully!")
-            else:
-                st.error(f"Upload failed: {response.text}")
-
-        except Exception as e:
-            st.error(f"Error: {e}")
-
-st.divider()
-
-# Ask Question
-question = st.text_input("Ask a question from the PDF")
-
-if st.button("Ask AI"):
-
-    if not question.strip():
-        st.warning("Please enter a question.")
-    else:
-
-        with st.spinner("Generating answer..."):
+        with st.spinner("Thinking..."):
 
             try:
 
                 response = requests.post(
                     f"{BACKEND_URL}/ask",
                     json={
-                        "query": question
+                        "question": user_input
                     }
                 )
 
@@ -73,12 +116,63 @@ if st.button("Ask AI"):
 
                     data = response.json()
 
-                    st.subheader("Answer")
+                    answer = (
+                        data.get("response")
+                        or data.get("answer")
+                        or str(data)
+                    )
 
-                    st.write(data["response"])
+                    st.session_state["messages"].append(
+                        (
+                            answer,
+                            False
+                        )
+                    )
 
                 else:
-                    st.error(f"Error: {response.text}")
+
+                    st.session_state["messages"].append(
+                        (
+                            f"❌ Error: {response.text}",
+                            False
+                        )
+                    )
 
             except Exception as e:
-                st.error(f"Error: {e}")
+
+                st.session_state["messages"].append(
+                    (
+                        f"❌ Error: {e}",
+                        False
+                    )
+                )
+
+        st.session_state["user_input"] = ""
+
+
+# Main Page
+def page():
+
+    st.title("📄 ChatPDF")
+
+    st.subheader("Upload PDF Document")
+
+    st.file_uploader(
+        "Upload PDF",
+        type=["pdf"],
+        key="file_uploader",
+        on_change=upload_pdf,
+        accept_multiple_files=True,
+    )
+
+    display_messages()
+
+    st.text_input(
+        "Ask a question about the PDF",
+        key="user_input",
+        on_change=process_input,
+    )
+
+
+if __name__ == "__main__":
+    page()
