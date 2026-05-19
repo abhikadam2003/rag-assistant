@@ -11,7 +11,7 @@ pipeline {
 
                         withDockerRegistry(credentialsId: 'docker-cred') {
 
-                            sh 'docker build -t abhishekkadam2003/rag_backend:latest .'
+                            sh 'docker build -t abhishekkadam2003/rag-backend:latest .'
 
                         }
                     }
@@ -25,7 +25,7 @@ pipeline {
 
                     withDockerRegistry(credentialsId: 'docker-cred') {
 
-                        sh 'docker push abhishekkadam2003/rag_backend:latest'
+                        sh 'docker push abhishekkadam2003/rag-backend:latest'
 
                     }
                 }
