@@ -6,6 +6,9 @@ COPY rag_backend/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install Playwright browsers
+RUN playwright install --with-deps chromium
+
 COPY rag_backend/ .
 COPY scraper_service/ ./scraper_service/
 
