@@ -4,20 +4,26 @@ import requests
 import streamlit as st
 
 # Backend Kubernetes Service URL
-BACKEND_URL = "http://a9b95e3a1969b4862b9cb041382d43bc-749627614.us-east-1.elb.amazonaws.com"
+BACKEND_URL = "http://backend-app-backend-chart.rag.svc.cluster.local:8000"
 
 st.set_page_config(
     page_title="ChatPDF",
     layout="wide"
 )
 
-
-# Store chat messages
+# -----------------------------------
+# Session State
+# -----------------------------------
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
+if "uploaded_files" not in st.session_state:
+    st.session_state["uploaded_files"] = []
 
-# Display messages
+
+# -----------------------------------
+# Display Chat Messages
+# -----------------------------------
 def display_messages():
 
     st.subheader("Chat")
@@ -35,12 +41,16 @@ def display_messages():
                 st.write(msg)
 
 
-# Upload PDF to backend
-def upload_pdf():
-
-    uploaded_files = st.session_state.get("file_uploader", [])
+# -----------------------------------
+# Upload PDF
+# -----------------------------------
+def handle_pdf_upload(uploaded_files):
 
     for file in uploaded_files:
+
+        # Avoid duplicate uploads
+        if file.name in st.session_state["uploaded_files"]:
+            continue
 
         with st.spinner(f"Uploading {file.name}..."):
 
@@ -56,10 +66,13 @@ def upload_pdf():
 
                 response = requests.post(
                     f"{BACKEND_URL}/upload-pdf",
-                    files=files
+                    files=files,
+                    timeout=300
                 )
 
                 if response.status_code == 200:
+
+                    st.session_state["uploaded_files"].append(file.name)
 
                     st.session_state["messages"].append(
                         (
@@ -81,13 +94,15 @@ def upload_pdf():
 
                 st.session_state["messages"].append(
                     (
-                        f"❌ Error: {e}",
+                        f"❌ Error: {str(e)}",
                         False
                     )
                 )
 
 
-# Ask question
+# -----------------------------------
+# Ask Question
+# -----------------------------------
 def process_input():
 
     user_input = st.session_state.get("user_input", "").strip()
@@ -109,7 +124,8 @@ def process_input():
                     f"{BACKEND_URL}/ask",
                     json={
                         "question": user_input
-                    }
+                    },
+                    timeout=300
                 )
 
                 if response.status_code == 200:
@@ -142,7 +158,7 @@ def process_input():
 
                 st.session_state["messages"].append(
                     (
-                        f"❌ Error: {e}",
+                        f"❌ Error: {str(e)}",
                         False
                     )
                 )
@@ -150,23 +166,29 @@ def process_input():
         st.session_state["user_input"] = ""
 
 
+# -----------------------------------
 # Main Page
+# -----------------------------------
 def page():
 
     st.title("📄 ChatPDF")
 
     st.subheader("Upload PDF Document")
 
-    st.file_uploader(
+    uploaded_files = st.file_uploader(
         "Upload PDF",
         type=["pdf"],
-        key="file_uploader",
-        on_change=upload_pdf,
         accept_multiple_files=True,
     )
 
+    # Upload files directly
+    if uploaded_files:
+        handle_pdf_upload(uploaded_files)
+
+    # Display Chat
     display_messages()
 
+    # Question Input
     st.text_input(
         "Ask a question about the PDF",
         key="user_input",
@@ -174,5 +196,8 @@ def page():
     )
 
 
+# -----------------------------------
+# Run App
+# -----------------------------------
 if __name__ == "__main__":
     page()
