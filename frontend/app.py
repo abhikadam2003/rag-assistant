@@ -4,7 +4,7 @@ import requests
 import streamlit as st
 
 # Backend Kubernetes Service URL
-BACKEND_URL = "http://backend-app-backend-chart.rag.svc.cluster.local:8000"
+BACKEND_URL = "http://a9b95e3a1969b4862b9cb041382d43bc-749627614.us-east-1.elb.amazonaws.com"
 
 st.set_page_config(
     page_title="ChatPDF",
