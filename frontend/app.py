@@ -15,11 +15,8 @@ st.set_page_config(
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-if "uploaded_file_name" not in st.session_state:
-    st.session_state.uploaded_file_name = None
-
-if "processing" not in st.session_state:
-    st.session_state.processing = False
+if "uploaded" not in st.session_state:
+    st.session_state.uploaded = False
 
 
 # Display chat
@@ -63,13 +60,25 @@ def upload_pdf(file):
 
             st.success("PDF Uploaded Successfully")
 
-            st.session_state.uploaded_file_name = file.name
-
         else:
+
+            st.session_state.messages.append(
+                (
+                    f"❌ Upload Failed: {response.text}",
+                    False
+                )
+            )
 
             st.error(response.text)
 
     except Exception as e:
+
+        st.session_state.messages.append(
+            (
+                f"❌ Error: {str(e)}",
+                False
+            )
+        )
 
         st.error(str(e))
 
@@ -135,21 +144,18 @@ def page():
         type=["pdf"]
     )
 
-    # Upload only once per file
-    if (
-        uploaded_file
-        and uploaded_file.name != st.session_state.uploaded_file_name
-    ):
+    # Upload immediately after selecting
+    if uploaded_file and not st.session_state.uploaded:
 
         upload_pdf(uploaded_file)
+
+        st.session_state.uploaded = True
 
     display_messages()
 
     question = st.chat_input("Ask a question about the PDF")
 
-    if question and not st.session_state.processing:
-
-        st.session_state.processing = True
+    if question:
 
         st.session_state.messages.append(
             (
@@ -159,8 +165,6 @@ def page():
         )
 
         ask_question(question)
-
-        st.session_state.processing = False
 
         st.rerun()
 
