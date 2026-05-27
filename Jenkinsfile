@@ -17,7 +17,6 @@ pipeline {
 
                     sh '''
                     helm upgrade --install frontend-app ./frontend-app -n rag
-                    -n rag
                     '''
                 }
             }
