@@ -25,7 +25,7 @@ class ChatPDF:
         # Connect to Ollama running inside Kubernetes
         self.model = ChatOllama(
             model=llm_model,
-            base_url="http://ollama-app-ollama-chart:11434"
+            base_url="http://ollama-app:11434"
         )
 
         # Split PDF into chunks
