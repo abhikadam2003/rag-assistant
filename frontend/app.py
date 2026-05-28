@@ -4,7 +4,7 @@ import requests
 import streamlit as st
 
 # Backend API URL
-BACKEND_URL = "http://backend-app-backend-chart.rag.svc.cluster.local:8000"
+BACKEND_URL = "http://backend-app:8000"
 
 st.set_page_config(
     page_title="ChatPDF",
